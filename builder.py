@@ -31,7 +31,7 @@ SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
 HEADERS = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
 PATCH_HEADERS = {**HEADERS, "Content-Type": "application/json", "Prefer": "return=minimal"}
 
-DEMO_ROOT = "/var/www/pipeline.sujitbuilds.com/demos"
+DEMO_ROOT = "/var/www/demo.thebluewhale.online/plumber"
 CAL_LINK = "https://calendly.com/sujitchan431/30min"
 
 PLUMBING_SERVICES = [
@@ -589,7 +589,7 @@ def main():
         with open(index_path, "w", encoding="utf-8") as f:
             f.write(html)
 
-        demo_url = f"https://pipeline.sujitbuilds.com/demos/{lead_id}/"
+        demo_url = f"https://demo.thebluewhale.online/plumber/{lead_id}/"
         update_lead(lead["id"], demo_url, used_theme)
 
         theme_label = THEMES[used_theme]["name"]
@@ -598,7 +598,7 @@ def main():
 
     print(f"\n{'='*50}")
     print(f"✅ {generated} demos generated")
-    print(f"🌐 https://pipeline.sujitbuilds.com/demos/")
+    print(f"🌐 https://demo.thebluewhale.online/plumber/")
 
     # Theme distribution summary
     if generated > 1:
