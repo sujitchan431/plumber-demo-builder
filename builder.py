@@ -14,7 +14,7 @@ Generates self-selling demo pages with:
 Usage:
   python3 builder.py [count] [--tier A|B|AB]
   python3 builder.py --single {lead_id}
-  python3 builder.py 1 --theme warm-local    (force specific theme)
+  python3 builder.py 1 --theme trust    (force specific theme)
 
 GitHub: https://github.com/sujitchan431/plumber-demo-builder
 """
@@ -49,11 +49,11 @@ def slugify(name):
 
 
 def get_leads(count, tier, single_id=None):
-    """Fetch plumbing leads from Supabase, ordered by score."""
+    """Fetch plumbing leads from Supabase, joined with stage_scoring for tier/score."""
     if single_id:
         r = requests.get(
             f"{SUPABASE_URL}/rest/v1/businesses"
-            f"?select=id,business_name,city,phone,email,website,rating,review_count,address,raw_data"
+            f"?select=id,business_name,city,phone,email,website,rating,review_count,address"
             f"&id=eq.{single_id}",
             headers=HEADERS,
         )
@@ -64,18 +64,23 @@ def get_leads(count, tier, single_id=None):
         if not data:
             return None
         lead = data[0]
-        raw = lead.get("raw_data") or {}
-        if isinstance(raw, str):
-            try: raw = json.loads(raw)
-            except: raw = {}
-        lead["_score"] = raw.get("pipeline_score", 0)
+        # Get scoring from stage_scoring
+        sr = requests.get(
+            f"{SUPABASE_URL}/rest/v1/stage_scoring"
+            f"?select=pipeline_tier,pipeline_score&business_id=eq.{single_id}",
+            headers=HEADERS,
+        )
+        if sr.status_code == 200 and sr.json():
+            sc = sr.json()[0]
+            lead["_score"] = sc.get("pipeline_score", 0)
+            lead["_tier"] = sc.get("pipeline_tier", "SKIP")
         return [lead]
 
+    # Batch: fetch businesses + stage_scoring
     r = requests.get(
         f"{SUPABASE_URL}/rest/v1/businesses"
-        f"?select=id,business_name,city,phone,email,website,rating,review_count,address,raw_data"
+        f"?select=id,business_name,city,phone,email,website,rating,review_count,address"
         f"&industry=eq.plumbers"
-        f"&order=raw_data->pipeline_score.desc"
         f"&limit=300",
         headers=HEADERS,
     )
@@ -84,15 +89,25 @@ def get_leads(count, tier, single_id=None):
         return []
 
     leads = r.json()
+    
+    # Fetch all scoring data
+    sr = requests.get(
+        f"{SUPABASE_URL}/rest/v1/stage_scoring"
+        f"?select=business_id,pipeline_tier,pipeline_score"
+        f"&limit=500",
+        headers=HEADERS,
+    )
+    scoring_lookup = {}
+    if sr.status_code == 200:
+        for row in sr.json():
+            scoring_lookup[row["business_id"]] = row
+
     filtered = []
     for lead in leads:
-        raw = lead.get("raw_data") or {}
-        if isinstance(raw, str):
-            try: raw = json.loads(raw)
-            except: raw = {}
-
-        lead_tier = raw.get("pipeline_tier", "D")
-        lead["_score"] = raw.get("pipeline_score", 0)
+        sc = scoring_lookup.get(lead["id"], {})
+        lead_tier = sc.get("pipeline_tier", "SKIP")
+        lead["_score"] = sc.get("pipeline_score", 0)
+        lead["_tier"] = lead_tier
 
         if tier == "A" and lead_tier != "A":
             continue
@@ -121,10 +136,11 @@ def generate_demo(lead, theme_name=None):
     # Theme selection
     if not theme_name or theme_name == "auto":
         theme_name = detect_theme(name)
-    theme = THEMES.get(theme_name, THEMES["modern-light"])
+    theme = THEMES.get(theme_name, THEMES["minimal"])
 
-    star_count = min(5, max(1, int(rating)))
-    stars = "★" * star_count + ("½" if rating % 1 >= 0.5 else "")
+    rating_num = rating if rating else 5.0
+    star_count = min(5, max(1, int(rating_num)))
+    stars = "★" * star_count + ("½" if rating_num % 1 >= 0.5 else "")
 
     html = f'''<!DOCTYPE html>
 <html lang="en">
@@ -514,28 +530,30 @@ function sendChat() {{
 
 
 def update_lead(lead_id, demo_url, theme_name):
-    """Save demo URL and theme to lead's raw_data in Supabase."""
+    """Save demo URL and theme to stage_demos (not raw_data)."""
+    # Upsert into stage_demos
     r = requests.get(
-        f"{SUPABASE_URL}/rest/v1/businesses?id=eq.{lead_id}&select=raw_data",
+        f"{SUPABASE_URL}/rest/v1/stage_demos?select=id&business_id=eq.{lead_id}",
         headers=HEADERS,
     )
-    raw = {}
-    if r.status_code == 200:
-        data = r.json()
-        if data and isinstance(data, list) and len(data) > 0:
-            raw = data[0].get("raw_data") or {}
-            if isinstance(raw, str):
-                raw = json.loads(raw) if raw else {}
-    raw["demo_url"] = demo_url
-    raw["demo_theme"] = theme_name
-    raw["demo_generated_at"] = datetime.now().isoformat()
-    raw["demo_version"] = "v2-multi-theme"
-
-    requests.patch(
-        f"{SUPABASE_URL}/rest/v1/businesses?id=eq.{lead_id}",
-        json={"raw_data": raw},
-        headers=PATCH_HEADERS,
-    )
+    if r.status_code == 200 and r.json():
+        # Update existing
+        requests.patch(
+            f"{SUPABASE_URL}/rest/v1/stage_demos?business_id=eq.{lead_id}",
+            json={"demo_url": demo_url, "demo_theme": theme_name},
+            headers=PATCH_HEADERS,
+        )
+    else:
+        # Insert new
+        requests.post(
+            f"{SUPABASE_URL}/rest/v1/stage_demos",
+            json={
+                "business_id": lead_id,
+                "demo_url": demo_url,
+                "demo_theme": theme_name,
+            },
+            headers={**HEADERS, "Content-Type": "application/json", "Prefer": "return=minimal"},
+        )
 
 
 def main():
@@ -616,7 +634,7 @@ def main():
         theme_list = ", ".join(f"{k} ({v['name']})" for k, v in THEMES.items())
         print(f"\n🎨 Available themes: {theme_list}")
         print(f"   Default: auto-detect based on business name")
-        print(f"   Override: --theme warm-local")
+        print(f"   Override: --theme trust")
 
 
 if __name__ == "__main__":

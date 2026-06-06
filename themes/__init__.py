@@ -1,12 +1,13 @@
 """
 Theme definitions for plumbing demo builder.
+5 themes: bold, hero, minimal, modern, trust.
 Each theme exposes get_styles() and get_accent() for the template engine.
 """
 
 THEMES = {
-    "modern-light": {
-        "name": "Modern Light",
-        "description": "Clean, professional, trust-focused — best for established plumbing companies",
+    "minimal": {
+        "name": "Minimal",
+        "description": "Clean, professional — best for established plumbing companies (default)",
         "css": """
   :root { --bg: #f8fafc; --card: #ffffff; --accent: #2563eb; --accent-glow: #3b82f6; --text: #1e293b; --muted: #64748b; --danger: #dc2626; --blue: #0ea5e9; --light-bg: #f1f5f9; --border: #e2e8f0; }
   body { background: var(--bg); color: var(--text); }
@@ -32,9 +33,9 @@ THEMES = {
 """,
         "accent_hex": "#2563eb",
     },
-    "warm-local": {
-        "name": "Warm Local",
-        "description": "Earth tones, neighborhood feel — best for family-run hardware stores and local shops",
+    "trust": {
+        "name": "Trust",
+        "description": "Warm, neighborhood feel — best for family-run shops and local hardware stores",
         "css": """
   :root { --bg: #fefce8; --card: #fffbeb; --accent: #d97706; --accent-glow: #f59e0b; --text: #3e2e1f; --muted: #78716c; --danger: #b91c1c; --blue: #0891b2; --light-bg: #fef3c7; --border: #e7d5a8; }
   body { background: var(--bg); color: var(--text); font-family: 'Georgia', 'Times New Roman', serif; }
@@ -65,9 +66,9 @@ THEMES = {
 """,
         "accent_hex": "#d97706",
     },
-    "dark-cyberpunk": {
-        "name": "Dark Cyberpunk",
-        "description": "Urgency, tech-forward — best for 24/7 emergency services and agencies",
+    "hero": {
+        "name": "Hero",
+        "description": "Bold urgency — best for 24/7 emergency services and rapid-response plumbers",
         "css": """
   :root { --bg: #0a0a14; --card: #141428; --accent: #ff6b35; --accent-glow: #ff8c5a; --text: #e0e0e0; --muted: #888; --danger: #ff3333; --blue: #4da6ff; --light-bg: #1a1a2e; --border: rgba(255,255,255,0.05); }
   body { background: var(--bg); color: var(--text); }
@@ -90,9 +91,9 @@ THEMES = {
 """,
         "accent_hex": "#ff6b35",
     },
-    "corporate-bold": {
-        "name": "Corporate Bold",
-        "description": "Polished, high-trust — best for larger franchises and multi-location operations",
+    "bold": {
+        "name": "Bold",
+        "description": "Polished, high-authority — best for larger franchises and multi-location operations",
         "css": """
   :root { --bg: #ffffff; --card: #ffffff; --accent: #0f172a; --accent-glow: #1e293b; --text: #0f172a; --muted: #475569; --danger: #dc2626; --blue: #3b82f6; --light-bg: #f8fafc; --border: #e2e8f0; }
   body { background: #fff; color: var(--text); }
@@ -126,6 +127,44 @@ THEMES = {
 """,
         "accent_hex": "#0f172a",
     },
+    "modern": {
+        "name": "Modern",
+        "description": "Sleek, contemporary — best for tech-forward plumbing companies. Dark gradient with violet accents.",
+        "css": """
+  :root { --bg: #0f0f23; --card: #1a1a2e; --accent: #7c3aed; --accent-glow: #a78bfa; --text: #e2e8f0; --muted: #94a3b8; --danger: #ef4444; --blue: #818cf8; --light-bg: #16213e; --border: rgba(255,255,255,0.06); }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+  .hero { background: linear-gradient(160deg, #1e1b4b 0%, #0f0f23 40%, #1a1a2e 100%); color: #fff; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%); border-radius: 50%; }
+  .hero .subtitle { color: #a78bfa; }
+  .hero .badge { background: rgba(124,58,237,0.2); color: #a78bfa; border: 1px solid rgba(124,58,237,0.3); }
+  .hero .location { color: #94a3b8; }
+  .hero .rating-display { color: #fff; }
+  .hero .stars { color: #fbbf24; }
+  .trust-bar { background: var(--card); border-bottom: 1px solid var(--border); }
+  .trust-item .num { color: #a78bfa; }
+  .service-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); transition: transform 0.2s, border-color 0.2s; }
+  .service-card:hover { border-color: rgba(124,58,237,0.5); transform: translateY(-2px); }
+  .calculator { background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+  .calculator select { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 8px; }
+  .calc-tab { background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; }
+  .calc-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-primary { background: var(--accent); color: #fff; border-radius: 8px; font-weight: 600; }
+  .btn-primary:hover { background: #6d28d9; box-shadow: 0 4px 16px rgba(124,58,237,0.3); }
+  .btn-outline { border-color: var(--accent); color: var(--accent); border-radius: 8px; }
+  .btn-emergency { background: var(--danger); color: #fff; border-radius: 8px; animation: pulse-modern 2s infinite; }
+  @keyframes pulse-modern { 0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); } 50% { box-shadow: 0 0 0 12px rgba(239,68,68,0); } }
+  .cta-section { background: linear-gradient(160deg, #1e1b4b 0%, #0f0f23 100%); border-radius: 0; margin: 0; }
+  .cta-section h2 { color: #fff; }
+  .chat-msg.bot { background: #16213e; color: var(--text); }
+  .chat-window { background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+  .chat-input-area input { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); }
+  .chat-header { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
+  footer { background: var(--card); border-top: 1px solid var(--border); color: var(--muted); }
+  .existing-site a { color: var(--muted); }
+  .section h2 { color: #e2e8f0; }
+""",
+        "accent_hex": "#7c3aed",
+    },
 }
 
 
@@ -133,17 +172,21 @@ def detect_theme(business_name: str) -> str:
     """Auto-detect the best theme for a business based on name keywords."""
     name_lower = business_name.lower()
 
-    # Emergency/24/7 services → dark cyberpunk
-    if any(w in name_lower for w in ["24/7", "emergency", "express", "rapid", "quick", "911", "rescue"]):
-        return "dark-cyberpunk"
+    # Emergency/24/7 → Hero
+    if any(w in name_lower for w in ["24/7", "emergency", "express", "rapid", "quick", "911", "rescue", "fire"]):
+        return "hero"
 
-    # Hardware stores, family-run → warm local
+    # Hardware, family-run → Trust
     if any(w in name_lower for w in ["hardware", "true value", "ace", "family", "home depot", "lowe", "local"]):
-        return "warm-local"
+        return "trust"
 
-    # Franchise, large operations → corporate bold
+    # Franchise, large ops → Bold
     if any(w in name_lower for w in ["pro", "group", "corp", "inc", "llc", "enterprise", "partner", "solution", "system"]):
-        return "corporate-bold"
+        return "bold"
 
-    # Everything else → modern light (safe, professional default)
-    return "modern-light"
+    # Tech-forward keywords → Modern
+    if any(w in name_lower for w in ["tech", "smart", "digital", "flow", "solution", "innovation", "green", "eco"]):
+        return "modern"
+
+    # Default → Minimal
+    return "minimal"

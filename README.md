@@ -8,7 +8,7 @@ Inspired by the [GHL Wizard video](https://youtu.be/3hKn54Vdnjg): *"Show them wh
 
 ## Features
 
-- 🎨 **4 themes** — Modern Light, Warm Local, Dark Cyberpunk, Corporate Bold (auto-detected or manual)
+- 🎨 **5 themes** — Minimal, Trust, Hero, Bold, Modern (auto-detected or manual)
 - 💰 **5 cost calculators** — Drain cleaning, water heater, pipe leak, toilet, sewer line
 - 💬 **AI chat widget** — Keyword-smart responses for plumbing FAQs (no API key needed)
 - 📅 **Calendly booking integration** — Direct "Book Service" CTA
@@ -33,17 +33,18 @@ python3 builder.py 5 --tier A
 python3 builder.py --single abc12345
 
 # Force a theme
-python3 builder.py 3 --theme warm-local
+python3 builder.py 3 --theme trust
 ```
 
 ## Themes
 
 | Theme | Best For | Auto-Detection |
 |---|---|---|
-| `modern-light` | Established plumbing companies | Default (no keyword match) |
-| `warm-local` | Family-run shops, hardware stores | "hardware", "ace", "home depot", "family" |
-| `dark-cyberpunk` | 24/7 emergency services | "emergency", "express", "rapid", "24/7" |
-| `corporate-bold` | Franchises, multi-location | "pro", "llc", "inc", "enterprise" |
+| `minimal` | Established plumbing companies | Default (no keyword match) |
+| `trust` | Family-run shops, hardware stores | "hardware", "ace", "true value", "family" |
+| `hero` | 24/7 emergency services | "emergency", "express", "rapid", "24/7", "rescue" |
+| `bold` | Franchises, multi-location | "pro", "llc", "inc", "enterprise", "group" |
+| `modern` | Tech-forward, contemporary | "tech", "smart", "digital", "flow", "eco" |
 
 ## How It Works
 
